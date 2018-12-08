@@ -61,7 +61,7 @@ This has two parts. First we need to get our new information candidates that we 
 
 Then we need to calculate our ignore factor. This will create a new vector that decides which new information gets learned and which doesn't. For this to work we need a vector with values between 0 and 1 that we will later multipy element-wise with the candidates _N_t_. We get the ignore factor like this **`i_t = sigmoid(W_c.[h_t-1, x_t] + b_c)`**.
 
-The result of N_t_ ![](./assets/pointwise.png) _i_t_ is the information that we want our long term memory to remember. We can call the result of this multiplication _L_t_
+The result of _N_t_ ![](./assets/pointwise.png) _i_t_ is the information that we want our long term memory to remember. We can call the result of this multiplication _L_t_
 
 **Remember gate**
 
@@ -93,7 +93,7 @@ A LSTM uses several equations to calculate the hidden state, where "![](./assets
 3) _h_t = STM_t ![](./assets/pointwise.png) tanh(LTM_t)_
 
 **Variables**
-* **Forget** = STM_t ![](./assets/pointwise.png) LTM_t-1
+* **Forget** = ![](./assets/forget_formula.png)
 * candidates_to_remember = ![](./assets/candidates_formula.png)
 * ignore = ![](./assets/ignore_formula.png)
 * **Learn** = candidates_to_remember ![](./assets/pointwise.png) ignore
