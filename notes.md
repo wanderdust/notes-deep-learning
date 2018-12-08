@@ -45,9 +45,11 @@ _credit: Chrish Olah_
 
 To get our forget factor the function is going to be a bit different than when we calculated the hidden state in a RNN. **`f_t=sigmoid(W_f.[h_t-1, x_t] + b_f)`**. This will give us a result between 1 and 0. When we multiply the forget factor element wise against the cell state, values near 1 will let everything through and values near 0 will let nothing through.
 
-The concatenation of `[h_t-1, x_t]` will give us a vector double the length, this is why our matrix _W_f_ will have to be of a specific size that will output a vector size same as _h_t-1_.  Example: if the sizes of h_t-1_ and _x_t_ are 1x4, the matrix of weigths _W_f_ will need to have a size 4x4 so that (1x4).(4x4) = (1x4).
+Forget gate: **C'_t = C_t-1 ![](./assets/pointwise.png) f_t**
 
-Our Cell state has now been updated to forget some information.
+Our Cell state has now been updated (C'_t) to forget some information.
+
+EXTRA NOTES: The concatenation of `[h_t-1, x_t]` will give us a vector double the length, this is why our matrix _W_f_ will have to be of a specific size that will output a vector size same as _h_t-1_.  Example: if the sizes of h_t-1_ and _x_t_ are 1x4, the matrix of weigths _W_f_ will need to have a size 4x4 so that (1x4).(4x4) = (1x4).
 
 **Learn gate**
 
@@ -57,17 +59,23 @@ This gate decides what new information we will need to add to the cell state.
 
 _credit: Chrish Olah_
 
-This has two parts. First we need to get our new information candidates that we want to update. We can get this with **`N_t = tanh(W_i.[h_t-1, x_t] + b_i)`**, which will give us a new vector with values from 1 to -1. 
+This has two parts. First we need to get our new information candidates. This will be the information that might or migth not get chosen to be remembered by the cell state. We can get this with **`N_t = tanh(W_i.[h_t-1, x_t] + b_i)`**, which will give us a new vector with values from 1 to -1. 
 
-Then we need to calculate our ignore factor. This will create a new vector that decides which new information gets learned and which doesn't. For this to work we need a vector with values between 0 and 1 that we will later multipy element-wise with the candidates _N_t_. We get the ignore factor like this **`i_t = sigmoid(W_c.[h_t-1, x_t] + b_c)`**.
+Then we need to calculate our ignore factor. This will create a new vector that decides which new information from the candidates gets learned and which doesn't. For this to work we need a vector with values between 0 and 1 that we will later multipy element-wise with the candidates _N_t_. We get the ignore factor like this **`i_t = sigmoid(W_c.[h_t-1, x_t] + b_c)`**.
 
-The result of _N_t_ ![](./assets/pointwise.png) _i_t_ is the information that we want our long term memory to remember. We can call the result of this multiplication _L_t_
+The result of **_N_t_ ![](./assets/pointwise.png) _i_t_** is the information that we want our long term memory to remember. We can call the result of this multiplication **_L_t_** so:
+
+Learn gate: **_L_t = N_t ![](./assets/pointwise.png) i_t_**
+
+Now we have the information that we want to add to our cell state.
 
 **Remember gate**
 
-The remember gate simply adds the new information we want to remember to our cell state. For this we only need to add the learned information to our cell state. Updated Cell state = _L_t_ + current cell state.
+The remember gate simply adds the new information we want to remember (_L_t_) to our cell state. For this we only need to add the learned information to the current cell state.
 
-Our Cell state has now been updated again to remember some new information.
+Updated Cell state: **`C_t = L_t + C'_t`**
+
+Our Cell state has now been updated to remember some new information.
 
 **Output gate**
 
@@ -78,25 +86,27 @@ This one uses the updated cell state (or long term memory) and the hidden state 
 
 _credit: Chrish Olah_
 
-Our short term memory is calculated the same as before **`o_t = sigmoid(W_o.[h_t-1, x_t] + b_o)`**. The short term memory will decide how much of the cell state we want to output, where a value of 1 will let that particular information through and 0 will let nothing through. As before we do an element wise multiplication agains the _tanh_ of the cell state _C_t_ to get our output and hidden state **_h_t = o_t ![](./assets/pointwise.png) tanh(C_t)_**
+Our short term memory is calculated the same as before **`o_t = sigmoid(W_o.[h_t-1, x_t] + b_o)`**. The short term memory will decide how much of the cell state we want to output, where a value of 1 will let that particular information through and 0 will let nothing through. As before we do an element wise multiplication agains the _tanh_ of the cell state _C_t_ to get our output and hidden state:
+
+Output gate:  **_h_t = o_t ![](./assets/pointwise.png) tanh(C_t)_**
 
 ### **TL;DR**
 
 To summarize everything:
 
-A simple RNN uses one equation to calculate the its hidden state: ![](./assets/vanillaRNN.png) where the function f is either a _tanh_ or _ReLU_.
+A simple **RNN** uses one equation to calculate the its hidden state: ![](./assets/vanillaRNN.png) where the function f is either a _tanh_ or _ReLU_.
 
-A LSTM uses several equations to calculate the hidden state, where "![](./assets/pointwise.png)" means element wise multiplication:
+A **LSTM** uses several equations to calculate the hidden state, where "![](./assets/pointwise.png)" means element wise multiplication:
 
 1) _LTM_t = LTM_t-1 ![](./assets/pointwise.png) forget + learn_
 2) _STM_t = sigmoid(W_o.[h_t-1, x_t] + b_o)_
 3) _h_t = STM_t ![](./assets/pointwise.png) tanh(LTM_t)_
 
-**Variables**
-* **Forget** = ![](./assets/forget_formula.png)
-* candidates_to_remember = ![](./assets/candidates_formula.png)
-* ignore = ![](./assets/ignore_formula.png)
-* **Learn** = candidates_to_remember ![](./assets/pointwise.png) ignore
+Variables:
+* **Forget**: ![](./assets/forget_formula.png)
+* candidates_to_remember: ![](./assets/candidates_formula.png)
+* ignore: ![](./assets/ignore_formula.png)
+* **Learn**: learn = ![](./assets/learn_formula.png)
 
 
 
