@@ -1,4 +1,4 @@
-## **RECURRENT NEURAL NETWORKS (RNN)**
+# **RECURRENT NEURAL NETWORKS (RNN)**
 
 Recurrent neural networks are useful to make predictions for data that is sequential, where knowing what has happened before will help us predict what will be next:
 
@@ -22,12 +22,12 @@ Recap:
 * Caclulate hidden state: **`h_t = activation(W.x_t + U.h_t-1)`**
 * Calculate output: **`output = V.h_t`**
 
-Something important to remember is that the size of our weights _W_, _U_ and _V_ have to be a size that will give us an output the same size as _h_t_. For example if _h_t-1_ is a vector with dimensions *3x1* our weight vectors will need to have a size *3x3* for the result of *3x3.3x1* to be a vector size *3x1*.
+Something important to remember is that the size of our weights _W_, _U_ and _V_ have to be a size that will give us an output the same size as _h_t-1_. For example if _h_t-1_ is a vector with dimensions *3x1* our weight vectors will need to have a size *3x3* for the result of *3x3.3x1* to be a vector size *3x1*.
 
 However there are many implementations of the RNN's, where the formulas might change. In some cases we will see that hidden state is calculated like this instead: **`h_t = tanh(W.[x_t + h_t-1] + b)`**. Where _x_t_ and _h_t_ get concatenated and multiplied by the weights _W_. The output of the matrix multiplication will be a vector with the same size as _h_t-1_.
 
 
-## **LONG SHORT TERM MEMORY (LSTM)**
+# **LONG SHORT TERM MEMORY (LSTM)**
 
 The problem with RNNs is that they can't remember older stuff very well, so it bases all of its predictions on recent events. Sometimes we need our network to remember remember back a bit to make more accurate predictions, this is where LSTMs come in. The LSTM adds a long term memory (also referred as cell state) that with the help of some gates (Forget gate, Learn gate, Remember gate and Use gate) will keep a long term memory to make sure that we remember information that happened a while ago.
 
@@ -35,13 +35,13 @@ The problem with RNNs is that they can't remember older stuff very well, so it b
 
 _credit: Chrish Olah_
 
-### **THE GATES**
+## **THE GATES**
 
 The gates are a way to let information get through. The core idea is to modify the cell state (the line on the top of the image, also referred as long term memory) in a way that will remove and add certain current information so later on we can use it to make better predictions.
 
 All our gates will be each a small neural network, in charge of their own specifc task.
 
-**Forget gate**
+**FORGET GATE**
 
 The first step is to decide what information we don't need from our long term memory (cell state). The forget gate is in charge of telling the cell state what information we don't need anymore. We get this from doing a element-wise multiplication (Eg: [1, 0, 3] x [2, 3, 4] = [2, 0, 12]) of our cell state and the forget factor _f_t_.
 
@@ -57,7 +57,7 @@ Our Cell state has now been updated (C'_t) to forget some information.
 
 EXTRA NOTES: The concatenation of `[h_t-1, x_t]` will give us a vector double the length, this is why our matrix _W_f_ will have to be of a specific size that will output a vector size same as _h_t-1_.  Example: if the sizes of h_t-1_ and _x_t_ are 1x4, the matrix of weigths _W_f_ will need to have a size 4x4 so that (1x4).(4x4) = (1x4).
 
-**Learn gate**
+**LEARN GATE**
 
 This gate decides what new information we will need to add to the cell state.
 
@@ -75,7 +75,7 @@ The result of **_N_t_ ![](./assets/pointwise.png) _i_t_** is the information tha
 
 Now we have the information that we want to add to our cell state.
 
-**Remember gate**
+**REMEMBER GATE**
 
 The remember gate simply **adds the new information we want to remember (_L_t_) to our cell state**. For this we only need to add the learned information to the current cell state.
 
@@ -83,7 +83,7 @@ The remember gate simply **adds the new information we want to remember (_L_t_) 
 
 Our Cell state has now been updated to remember some new information.
 
-**Output gate**
+**OUTPUT GATE**
 
 This one uses the updated cell state (or long term memory) and the hidden state (or short term memory) to come up with a new short term memory (output).
 
@@ -114,6 +114,26 @@ Variables:
 * ignore: ![](./assets/ignore_formula.png)
 * **learn**: learn = ![](./assets/learn_formula.png)
 
+# **IMPLEMENTING RNNs AND LSTMs**
+
+From here one we will work out how to implement recurrent neural networks in code, where I'll be using Pytorch. But before we start let's list some things our model will need:
+
+Prepare the data:
+* **One hot encoding**: one hot encoding means converting our data to ones and ceros (Eg.[0,1,0,0,0]), because that's what the network will understand. To do this we get all of our vocabulary and convert it to a vector with size the same as the length of our vocabulary, filled all with ceros and a one. For example if we are feeding single characters to our network, our vocabulary will be **each** and every single **unique** **character** we are using, **and we convert each to a vector with ceros and a one**. Imagine our vocabulary was the word "hello!" and we are feeding our network one character at a time: our vocabulary would be 'h', 'e', 'l', 'o', '!', when we one hot encode it will be a vector length 5. So our input vector will look something like this `(batch_size=1, seq_length=1, input_size=5)`
+
+* **Sequence length**: We don't want to feed our network one input at a time. Lets take the "hello" example from before. We want to feed our network sequences (e.g a sequence of 3 characters seq_1 = ["h", "e", "l"], seq_2 =["l", "o", "!"]), and our RNN will go through each character of our sequence and make a prediction (output). This output is the hidden state that we pass to our next character in the sequence, which will give us a new hidden state and so on. Our input vector will look like this `(batch_size=1, seq_length=3, input_size=5)`.
+
+* **Batch size**: Finally we don't want to just feed our network one sequence at a time, we want to feed it multiple sequences at once, and we can do this with a batch size. What the batch size does is instead of caclulating the error for one char at a time in the sequence, it will caclulate the average error of the multiple chars because we are giving it more than one sequence at a time, which will be more efficient and therefore train faster. So we can input the following sequences in a batch: "hello", "eolll", "hleel", and the error will be calculated on the step_1 for [h,e,h], on step_2 for [e,o,l], step_3 for [l,l,e] and so on. Our input vector will look like this `(batch_size=3, seq_length=5, input_size=5)`. 
+
+Parameters:
+* `input_size`: the size of the input vector that we feed our network each time. Our input will probably be a one hot vector, so **the size of the input will be the length** of this vector. Example: input size of [0,1,0,0,0] is 5. 
+* `hidden_size`: hidden size is the **size of the output** we want our network to have. Like a normal neural network where we have an input layer and an output layer, the hidden size is the number of classes in our oputput layer.
+* `num_layers`:  number of recurrent layers. E.g., setting `num_layers=2` would mean stacking two RNNs together with the second RNN taking in outputs of the first RNN and computing the final results.
+* `nonlinearity`: the type of activation function you want to use. The default is tanh, but ReLU can be used instead.
+* `batch_first`: this simply asks if your vector (1,1,4) will start with the batch size as the first dimension.  If `True` the input and output tensors are provided like (batch_size, seq_length, hidden_size)
+
+
+
 
 
 
@@ -122,3 +142,5 @@ Variables:
 * Chris Olah's tutorial: http://bit.ly/2seO9VI
 * Denny Britz's tutorial: http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
 * Edwin Chen's tutorial: http://blog.echen.me/2017/05/30/exploring-lstms/
+* Sung Kims' youtube channel: https://www.youtube.com/watch?time_continue=794&v=ogZi5oIo4fI
+* Pytorch docs: https://pytorch.org/docs/
