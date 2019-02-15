@@ -73,11 +73,11 @@ If we tried to do the same thing as before, we would get something divided by ce
 
 ![Softmax function](./assets/softmax.png)
 
-This function is the exact same thing as before, but we do the exponential for every value. The result is going to be values between 1 and 0, and the sum of all of our classes (Dog, Bunny, Cat) will add up to one.
+This function is called softmax and is the exact same thing as before, but we do the exponential for every value. The result is going to be values between 1 and 0, and the sum of all of our classes (Dog, Bunny, Cat) will add up to one.
 
 If we switch back to our first example, with all that we have learned our perceptron now looks like this:
 
-![Image of a perceptron](./assets/single_perceptron_sigmoid.png)
+![Image of a perceptron](./assets/single_perceptron_softmax.png)
 
 
 
@@ -95,7 +95,7 @@ Our model is a function, and it will only understand numbers, but our data can b
 
 Before I have explained how our model can take an input and give us a prediction. However we want to know how good our model is, is it giving us the right predictions, or is it complete rubish?
 
-One way to know if our model is good is to compare the prediction with the value we expected. For example, if we gave our model an image of a dog, we would expect that the prediction would be dog. For example, imagine our prediction after applying sigmoid looks like this.
+One way to know if our model is good is to compare the prediction with the value we expected. For example, if we gave our model an image of a dog, we would expect that the prediction would be dog. For example, imagine our prediction after applying softmax looks like this.
 * Probabities of being a Dog: 0.7
 * Probabities of being a Bunny: 0.2
 * Probabities of being a Cat: 0.1
@@ -162,7 +162,7 @@ Our error function will basically be the same as the cross entropy. Which is the
 ![Error function](./assets/error_function.png)
 
 * _y_ is the label or expected output (1 or 0).
-* _y_hat_ is the actual prediction. In the end _y_hat_ is our model function: *y_hat = sigmoid(Wx + b)*
+* _y_hat_ is the actual prediction. In the end _y_hat_ is our model function: *y_hat = softmax(Wx + b)*
 
 Basically the lower our error function is, the better our model will perform, because it will clasify (predict) our classes better.
 
