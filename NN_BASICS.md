@@ -48,7 +48,9 @@ For the previous example with our red and blue dots, we can simply say: if we ge
 
 ![Step function](./assets/step_function.png)
 
-This is very cool and it makes things a lot simpler... but wait, what if we wanted to predict something that had more than two results? For example what if we gave our model an image of an animal and we wanted to konw if it is a cat, a dog or a bunny? Lets walk through it.
+This is very cool and it makes things a lot simpler... but wait, what if we wanted something more than a 1 or a 0? Something maybe with a range?
+
+For example what if we gave our model an image of an animal and we wanted to konw if it is a cat, a dog or a bunny? Lets walk through it.
 
 Imagine our model taking an input a few variables, size, cuteness, and furryness. And from these inputs it will make a prediction. For this example just imagine our output will be three different classes: cat, dog or bunny. Each class will give us a different number, telling us how likely it is that our prediction is a cat, dog or bunny.
 
